@@ -2,7 +2,7 @@
 
 Tooyter é uma API simples para um blog, possibilitando adicionar ou remover postagens e comentários, assim como dar like em ambos.
 
-## Installation
+## Technical Information
 
 - .NET 8.0
 - Visual Studio 2022
