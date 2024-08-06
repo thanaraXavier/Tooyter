@@ -1,10 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\thaynara.xavier\\source\\repos\\Tooyter\\",
+  "WorkspaceRootPath": "C:\\Users\\thaynara.xavier\\source\\repos\\Tooyter_Frontend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{063BEE82-589E-479A-A4F8-0DCF87A93B7F}|Services\\Services.csproj|c:\\users\\thaynara.xavier\\source\\repos\\tooyter\\services\\services\\commentsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{063BEE82-589E-479A-A4F8-0DCF87A93B7F}|Services\\Services.csproj|solutionrelative:services\\services\\commentsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{086693B1-D0FD-4F38-91DE-7D91CC642439}|Tooyter\\Tooyter.csproj|c:\\users\\thaynara.xavier\\source\\repos\\tooyter_frontend\\tooyter\\controllers\\postscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{086693B1-D0FD-4F38-91DE-7D91CC642439}|Tooyter\\Tooyter.csproj|solutionrelative:tooyter\\controllers\\postscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,14 +31,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "CommentsServices.cs",
-              "DocumentMoniker": "C:\\Users\\thaynara.xavier\\source\\repos\\Tooyter\\Services\\Services\\CommentsServices.cs",
-              "RelativeDocumentMoniker": "Services\\Services\\CommentsServices.cs",
-              "ToolTip": "C:\\Users\\thaynara.xavier\\source\\repos\\Tooyter\\Services\\Services\\CommentsServices.cs*",
-              "RelativeToolTip": "Services\\Services\\CommentsServices.cs*",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAA1AAAA",
+              "Title": "PostsController.cs",
+              "DocumentMoniker": "C:\\Users\\thaynara.xavier\\source\\repos\\Tooyter_Frontend\\Tooyter\\Controllers\\PostsController.cs",
+              "RelativeDocumentMoniker": "Tooyter\\Controllers\\PostsController.cs",
+              "ToolTip": "C:\\Users\\thaynara.xavier\\source\\repos\\Tooyter_Frontend\\Tooyter\\Controllers\\PostsController.cs",
+              "RelativeToolTip": "Tooyter\\Controllers\\PostsController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-07-30T16:59:46.676Z",
+              "WhenOpened": "2024-08-06T19:00:03.269Z",
               "EditorCaption": ""
             }
           ]

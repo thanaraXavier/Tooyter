@@ -1,6 +1,8 @@
 ﻿using DataAccess;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.Models;
+using Models.ModelsDto;
 using Services.Services;
 
 namespace Tooyter.Controllers
@@ -19,22 +21,26 @@ namespace Tooyter.Controllers
         }
 
         [HttpGet]
-        [Route("LerComentarios")]
+        [Route("LerComentarios/{idDoPost}")]
         public IActionResult LerComentarios(int idDoPost)
         {
-            var post = _db.Posts.Where(p => p.PostId == idDoPost).Select(p => new
-            {
-                p.PostId,
-                p.PostTitle,
-                p.PostText,
-                p.LikesQuantity,
-                Comentarios = p.Comments.Select(c => new
+            var post = _db.Posts
+                .Include(p => p.Comments)
+                .Where(p => p.PostId == idDoPost)
+                .Select(p => new
                 {
-                    c.CommentId,
-                    c.CommentText,
-                    c.LikeQuantity
-                }).ToList()
-            }).FirstOrDefault();
+                    p.PostId,
+                    p.PostTitle,
+                    p.PostText,
+                    p.LikesQuantity,
+                    Comments = p.Comments.Select(c => new
+                    {
+                        c.CommentId,
+                        c.CommentText,
+                        c.LikeQuantity
+                    }).ToList()
+                })
+                .FirstOrDefault();
 
             if (post == null)
             {
@@ -44,33 +50,35 @@ namespace Tooyter.Controllers
             return Ok(post);
         }
 
+
         [HttpPost]
         [Route("AdicionarComentario")]
-        public IActionResult AdicionarComentario(int idDaPostagem, string textoDoComentario)
+        public IActionResult AdicionarComentario([FromBody] CommentDto newComment)
         {
-            string tamanhoCorreto = _commentService.VerificarTamanhoDoComentario(textoDoComentario);
-            if (tamanhoCorreto != String.Empty)
+            var tamanhoIncorreto = _commentService.VerificarTamanhoDoComentario(newComment);
+            if (tamanhoIncorreto != String.Empty)
             {
-                return BadRequest(tamanhoCorreto);
+                return BadRequest(tamanhoIncorreto);
             }
 
-            var postagem = _db.Posts.FirstOrDefault(p => p.PostId == idDaPostagem);
-
-            if (postagem == null)
+            var comment = new Comment()
             {
-                return NotFound("Essa postagem não existe.");
+                CommentText = newComment.CommentText,
+                PostId = newComment.PostId,
+            };
+
+            var post = _db.Posts.FirstOrDefault(p => p.PostId == newComment.PostId);
+            if (post == null)
+            {
+                return BadRequest("Nenhuma postagem com esse ID foi encontrada.");
             }
-
-            var comment = new Comment();
-
-            comment.CommentText = textoDoComentario;
-            comment.PostId = idDaPostagem;
 
             _db.Comments.Add(comment);
             _db.SaveChanges();
-            _commentService.AtualizaQntdComentarios(postagem);
 
-            return Ok(comment);
+            _commentService.AtualizaQntdComentarios(post);
+
+            return Ok("Comentário adicionado.");
         }
 
         [HttpPut]

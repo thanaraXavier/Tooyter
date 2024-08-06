@@ -11,13 +11,11 @@ builder.Services.AddScoped<Services.Services.CommentsServices>();
 builder.Services.AddScoped<Services.Services.PostsServices>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-    });
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});
 
-builder.Services.AddControllers();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add Swagger/OpenAPI services.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -32,8 +30,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles(); // Serve static files from wwwroot
+
+app.UseRouting();
+
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapFallbackToFile("index.html"); // Serve the HTML file for routes not found
+});
 
 app.Run();

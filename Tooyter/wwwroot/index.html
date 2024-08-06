@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postagens do Blog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .post {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .comment {
+            margin-top: 10px;
+            padding-left: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .like-button, .delete-button {
+            background-color: #007bff;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Postagens do Blog</h1>
+    <h2>Adicionar Nova Postagem</h2>
+    <form id="addPostForm">
+        <div class="form-group">
+            <label for="postTitle">Título:</label>
+            <input type="text" id="postTitle" name="postTitle" required>
+        </div>
+        <div class="form-group">
+            <label for="postText">Texto:</label>
+            <textarea id="postText" name="postText" rows="4" required></textarea>
+        </div>
+        <button type="submit">Adicionar Postagem</button>
+    </form>
+    <div id="postsContainer"></div>
+
+    <script>
+        const apiBaseUrl = '/api/posts/Timeline';
+        const addPostUrl = '/api/posts/AdicionarPostagem';
+        const likePostUrl = '/api/posts/DarLikeEmPost';
+        const deletePostUrl = '/api/posts/DeletarPostagem';
+
+        async function loadPosts() {
+            try {
+                const response = await fetch(apiBaseUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Erro na resposta da API: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+                console.log('Resposta da API:', responseData); // Debug
+
+                const posts = responseData.$values || [];
+                console.log('Posts extraídos:', posts); // Debug
+
+                const postsContainer = document.getElementById('postsContainer');
+                postsContainer.innerHTML = ''; // Limpa postagens existentes
+
+                if (Array.isArray(posts) && posts.length > 0) {
+                    posts.forEach(post => {
+                        console.log('Post:', post); // Debug
+
+                        const postTitle = post.postTitle || 'Título não disponível';
+                        const postText = post.postText || 'Texto não disponível';
+                        const likesQuantity = post.likesQuantity !== undefined ? post.likesQuantity : 0;
+                        const commentsQuantity = post.commentsQuantity !== undefined ? post.commentsQuantity : 0;
+                        const postId = post.postId;
+
+                        const postDiv = document.createElement('div');
+                        postDiv.classList.add('post');
+                        postDiv.innerHTML = `
+                                <h3>${postTitle}</h3>
+                                <p>${postText}</p>
+                                <p><strong>Likes:</strong> ${likesQuantity} | <strong>Comentários:</strong> ${commentsQuantity}</p>
+                                <button class="like-button" onclick="likePost(${postId})">Dar Like</button>
+                                <button class="delete-button" onclick="deletePost(${postId})">Deletar</button>
+                                <a href="exibir-postagem.html?id=${postId}">Ver Comentários</a>
+                            `;
+                        postsContainer.appendChild(postDiv);
+                    });
+                } else {
+                    postsContainer.innerHTML = '<p>Nenhuma postagem encontrada.</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar postagens:', error);
+                document.getElementById('postsContainer').innerHTML = '<p>Erro ao carregar postagens. Tente novamente mais tarde.</p>';
+            }
+        }
+
+        async function addPost(event) {
+            event.preventDefault();
+
+            const postTitle = document.getElementById('postTitle').value;
+            const postText = document.getElementById('postText').value;
+
+            const requestBody = {
+                PostTitle: postTitle,
+                PostText: postText
+            };
+
+            try {
+                const response = await fetch(addPostUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Erro na resposta da API: ${response.status} - ${errorMessage}`);
+                }
+
+                const newPost = await response.json();
+                console.log('Nova postagem adicionada:', newPost);
+
+                loadPosts(); // Recarrega a lista de postagens
+                document.getElementById('addPostForm').reset(); // Limpa o formulário
+            } catch (error) {
+                console.error('Erro ao adicionar postagem:', error);
+                alert('Erro ao adicionar postagem. Tente novamente mais tarde.');
+            }
+        }
+
+        async function likePost(postId) {
+            try {
+                const response = await fetch(`${likePostUrl}?idDaPostagem=${postId}`, {
+                    method: 'PUT',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro na resposta da API: ${response.status}`);
+                }
+
+                const updatedPost = await response.json();
+                console.log('Postagem atualizada com like:', updatedPost);
+
+                loadPosts(); // Recarrega a lista de postagens
+            } catch (error) {
+                console.error('Erro ao dar like na postagem:', error);
+                alert('Erro ao dar like na postagem. Tente novamente mais tarde.');
+            }
+        }
+
+        async function deletePost(postId) {
+            try {
+                const response = await fetch(`${deletePostUrl}?idDaPostagem=${postId}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro na resposta da API: ${response.status}`);
+                }
+
+                const result = await response.text();
+                console.log(result);
+
+                loadPosts(); // Recarrega a lista de postagens
+            } catch (error) {
+                console.error('Erro ao deletar postagem:', error);
+                alert('Erro ao deletar postagem. Tente novamente mais tarde.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPosts);
+        document.getElementById('addPostForm').addEventListener('submit', addPost);
+    </script>
+</body>
+</html>

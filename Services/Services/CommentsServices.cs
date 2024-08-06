@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Models.Models;
+using Models.ModelsDto;
 
 namespace Services.Services
 {
@@ -23,11 +24,11 @@ namespace Services.Services
             _db.SaveChanges();
         }
 
-        public string VerificarTamanhoDoComentario(string texto)
+        public string VerificarTamanhoDoComentario(CommentDto comment)
         {
             string resposta = String.Empty;
 
-            if (texto.Length > 120)
+            if (comment.CommentText.Length > 120)
             {
                 resposta = "O conteúdo da postagem deve ter no máximo 120 caracteres.";
             }

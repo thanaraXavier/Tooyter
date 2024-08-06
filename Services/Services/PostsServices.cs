@@ -1,4 +1,5 @@
 ﻿using DataAccess;
+using Models.ModelsDto;
 
 namespace Services.Services
 {
@@ -10,16 +11,16 @@ namespace Services.Services
             _db = db;
         }
 
-        public string VerificarTamanhoDaPostagem(string title, string text)
+        public string VerificarTamanhoDaPostagem(PostDto postagem)
         {
             string resposta = String.Empty;
 
-            if (title.Length > 50)
+            if (postagem.PostTitle.Length > 50)
             {
                 resposta = "O título deve ter no máximo 50 caracteres.";
             }
 
-            if (text.Length > 120)
+            if (postagem.PostText.Length > 120)
             {
                 resposta = "O conteúdo da postagem deve ter no máximo 120 caracteres.";
             }

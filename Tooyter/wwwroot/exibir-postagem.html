@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentários da Postagem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .post {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .comment {
+            margin-top: 10px;
+            padding-left: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .like-button, .delete-button {
+            background-color: #007bff;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detalhes da Postagem</h1>
+    <div id="postContainer"></div>
+    <h2>Adicionar Comentário</h2>
+    <form id="addCommentForm">
+        <div class="form-group">
+            <label for="commentText">Comentário:</label>
+            <textarea id="commentText" name="commentText" rows="4" required></textarea>
+        </div>
+        <input type="hidden" id="postId" name="postId">
+        <button type="submit">Adicionar Comentário</button>
+    </form>
+    <div id="commentsContainer"></div>
+
+    <script>
+        const postId = new URLSearchParams(window.location.search).get('id');
+        const apiPostUrl = `/api/comments/LerComentarios/${postId}`;
+        const addCommentUrl = '/api/comments/AdicionarComentario';
+        const likeCommentUrl = '/api/comments/DarLikeEmComentario';
+        const deleteCommentUrl = '/api/comments/DeletarComentario';
+
+        async function loadPostAndComments() {
+            try {
+                const response = await fetch(apiPostUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Erro na resposta da API: ${response.status}`);
+                }
+
+                const post = await response.json();
+                console.log('Postagem e comentários carregados:', post);
+
+                const postContainer = document.getElementById('postContainer');
+                postContainer.innerHTML = `
+                    <div class="post">
+                        <h3>${post.postTitle || 'Título não disponível'}</h3>
+                        <p>${post.postText || 'Texto não disponível'}</p>
+                        <p><strong>Likes:</strong> ${post.likesQuantity || 0} | <strong>Comentários:</strong> ${post.comments ? post.comments.$values.length : 0}</p>
+                    </div>
+                `;
+
+                const commentsContainer = document.getElementById('commentsContainer');
+                commentsContainer.innerHTML = '';
+
+                if (post.comments && post.comments.$values && post.comments.$values.length > 0) {
+                    post.comments.$values.forEach(comment => {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.classList.add('comment');
+                        commentDiv.innerHTML = `
+                            <p>${comment.commentText || 'Comentário não disponível'}</p>
+                            <p><strong>Likes:</strong> ${comment.likeQuantity || 0}</p>
+                            <button class="like-button" onclick="likeComment(${comment.commentId})">Dar Like</button>
+                            <button class="delete-button" onclick="deleteComment(${comment.commentId})">Deletar</button>
+                        `;
+                        commentsContainer.appendChild(commentDiv);
+                    });
+                } else {
+                    commentsContainer.innerHTML = '<p>Nenhum comentário encontrado.</p>';
+                }
+
+                document.getElementById('postId').value = postId;
+
+            } catch (error) {
+                console.error('Erro ao carregar a postagem e os comentários:', error);
+                document.getElementById('postContainer').innerHTML = '<p>Erro ao carregar a postagem. Tente novamente mais tarde.</p>';
+            }
+        }
+
+        async function addComment(event) {
+            event.preventDefault();
+
+            const commentText = document.getElementById('commentText').value;
+            const postId = document.getElementById('postId').value;
+
+            const requestBody = {
+                CommentText: commentText,
+                PostId: parseInt(postId, 10)
+            };
+
+            try {
+                const response = await fetch(addCommentUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Erro na resposta da API: ${response.status} - ${errorMessage}`);
+                }
+
+                const result = await response.text();
+                console.log(result);
+
+                loadPostAndComments(); // Recarrega a postagem e os comentários
+                document.getElementById('addCommentForm').reset(); // Limpa o formulário
+            } catch (error) {
+                console.error('Erro ao adicionar comentário:', error);
+                alert('Erro ao adicionar comentário. Tente novamente mais tarde.');
+            }
+        }
+
+        async function likeComment(commentId) {
+            try {
+                const response = await fetch(`${likeCommentUrl}?idDoComentario=${commentId}`, {
+                    method: 'PUT',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro na resposta da API: ${response.status}`);
+                }
+
+                const updatedComment = await response.json();
+                console.log('Comentário atualizado com like:', updatedComment);
+
+                loadPostAndComments(); // Recarrega a postagem e os comentários
+            } catch (error) {
+                console.error('Erro ao dar like no comentário:', error);
+                alert('Erro ao dar like no comentário. Tente novamente mais tarde.');
+            }
+        }
+
+        async function deleteComment(commentId) {
+            try {
+                const response = await fetch(`${deleteCommentUrl}?idDoComentario=${commentId}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro na resposta da API: ${response.status}`);
+                }
+
+                const result = await response.text();
+                console.log(result);
+
+                loadPostAndComments(); // Recarrega a postagem e os comentários
+            } catch (error) {
+                console.error('Erro ao deletar comentário:', error);
+                alert('Erro ao deletar comentário. Tente novamente mais tarde.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPostAndComments);
+        document.getElementById('addCommentForm').addEventListener('submit', addComment);
+    </script>
+</body>
+</html>
